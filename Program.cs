@@ -49,6 +49,7 @@ internal class Program
             Console.WriteLine("MENU PRINCIPAL");
             Console.WriteLine("1 - Consultar João 3:16 (Português - Almeida)");
             Console.WriteLine("2 - Consultar John 3:16 (Inglês - World English Bible)");
+            Console.WriteLine("3 - Consultar outra passagem (Português - Almeida)");
             Console.WriteLine("0 - Sair");
             Console.Write("Escolha uma opção: ");
 
@@ -75,6 +76,10 @@ internal class Program
                     await ConsultarPassagemAsync(ApiUrlIngles);
                     break;
 
+                case "3":
+                    await ConsultarOutraPassagemAsync();
+                    break;
+
                 case "0":
                     continuar = false;
                     Console.WriteLine("Programa terminado. Obrigado!");
@@ -87,6 +92,28 @@ internal class Program
 
             Console.WriteLine();
         }
+    }
+
+    private static async Task ConsultarOutraPassagemAsync()
+    {
+        Console.WriteLine("Introduza uma referência bíblica.");
+        Console.WriteLine("Exemplos: Gênesis 1 | Salmos 23 | Mateus 5:1-12 | João 3:16");
+        Console.Write("Referência: ");
+
+        string? referencia = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(referencia))
+        {
+            Console.WriteLine("Não foi indicada nenhuma referência.");
+            return;
+        }
+
+        // Codifica espaços, acentos e outros caracteres para o URL.
+        string referenciaCodificada = Uri.EscapeDataString(referencia.Trim());
+        string url =
+            $"https://bible-api.com/{referenciaCodificada}?translation=almeida";
+
+        await ConsultarPassagemAsync(url);
     }
 
     private static async Task ConsultarPassagemAsync(string url)
@@ -128,6 +155,7 @@ internal class Program
             Console.WriteLine("CONSULTA REALIZADA COM SUCESSO!");
             Console.WriteLine($"Referência: {dados.Reference}");
             Console.WriteLine($"Tradução: {dados.TranslationName} ({dados.TranslationId})");
+            Console.WriteLine($"Versículos recebidos: {dados.Verses.Count}");
 
             if (!string.IsNullOrWhiteSpace(dados.TranslationNote))
             {
@@ -141,13 +169,6 @@ internal class Program
                 Console.WriteLine(
                     $"{versiculo.BookName} {versiculo.Chapter}:{versiculo.Number}");
                 Console.WriteLine(versiculo.Text.Trim());
-                Console.WriteLine("----------------------------------------------");
-            }
-
-            if (dados.Verses.Count > 1)
-            {
-                Console.WriteLine("TEXTO COMPLETO:");
-                Console.WriteLine(dados.Text.Trim());
                 Console.WriteLine("----------------------------------------------");
             }
         }

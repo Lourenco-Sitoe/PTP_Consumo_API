@@ -21,6 +21,14 @@ Endpoints utilizados:
 
 A API devolve uma resposta JSON com a referência, a lista de versículos, o texto completo, a tradução utilizada e uma nota sobre a tradução.
 
+Também é possível consultar qualquer outro livro, capítulo, versículo ou intervalo. Exemplos:
+
+- Capítulo inteiro: `https://bible-api.com/genesis%201?translation=almeida`
+- Salmo inteiro: `https://bible-api.com/salmos%2023?translation=almeida`
+- Intervalo de versículos: `https://bible-api.com/mateus%205:1-12?translation=almeida`
+
+A API permite consultar qualquer passagem da Bíblia, mas não foi feita para descarregar a Bíblia inteira num único pedido. A documentação indica um limite de **15 pedidos por cada 30 segundos** e recomenda utilizar o repositório de dados de origem para obter a Bíblia completa.
+
 Exemplo simplificado da resposta:
 
 ```json
@@ -52,7 +60,7 @@ Exemplo simplificado da resposta:
 - Atributos `[JsonPropertyName]` para associar os campos JSON às propriedades C#.
 - Tratamento de erros com `try-catch`.
 - Apresentação da referência, tradução e versículos na consola.
-- Menu com opção de consultar a passagem em português ou em inglês.
+- Menu com opções para consultar passagens fixas e qualquer referência indicada pelo utilizador.
 
 ## 4. Requisitos de software
 
@@ -66,7 +74,7 @@ Exemplo simplificado da resposta:
 3. Aguarde a restauração dos componentes do projeto.
 4. Se necessário, selecione o projeto como projeto de arranque.
 5. Execute com `Ctrl + F5` ou clique em **Iniciar sem depurar**.
-6. No menu, escreva `1` para consultar em português ou `2` para consultar em inglês.
+6. No menu, escreva `1` ou `2` para as passagens de exemplo, ou `3` para introduzir outra referência (por exemplo, `Salmos 23`).
 7. Para terminar, escreva `0`.
 
 É necessária uma ligação à Internet para consultar a API.
@@ -119,12 +127,13 @@ Consumo_API_CSharp/
 ## 9. Funcionamento do código
 
 1. `HttpClient` envia a requisição GET para o endpoint escolhido no menu.
-2. A resposta 404 é tratada e `EnsureSuccessStatusCode()` verifica os restantes códigos HTTP.
-3. `ReadAsStreamAsync()` permite ler o conteúdo devolvido pelo servidor.
-4. `JsonSerializer.DeserializeAsync<BibleResponse>()` converte o JSON em objetos C#.
-5. Os atributos `[JsonPropertyName]` ligam os nomes do JSON (`book_name`, `translation_name`, etc.) às propriedades das classes.
-6. O ciclo `foreach` percorre os versículos e apresenta o livro, capítulo, número do versículo e texto.
-7. Os blocos `catch` tratam falhas de comunicação, erros de JSON, timeout e outros erros inesperados.
+2. Na opção `3`, `Uri.EscapeDataString()` codifica a referência introduzida pelo utilizador para que possa ser usada no URL.
+3. A resposta 404 é tratada e `EnsureSuccessStatusCode()` verifica os restantes códigos HTTP.
+4. `ReadAsStreamAsync()` permite ler o conteúdo devolvido pelo servidor.
+5. `JsonSerializer.DeserializeAsync<BibleResponse>()` converte o JSON em objetos C#.
+6. Os atributos `[JsonPropertyName]` ligam os nomes do JSON (`book_name`, `translation_name`, etc.) às propriedades das classes.
+7. O ciclo `foreach` percorre os versículos e apresenta o livro, capítulo, número do versículo e texto.
+8. Os blocos `catch` tratam falhas de comunicação, erros de JSON, timeout e outros erros inesperados.
 
 ## 10. Exemplo de execução
 
@@ -132,6 +141,7 @@ Consumo_API_CSharp/
 CONSULTA REALIZADA COM SUCESSO!
 Referência: João 3:16
 Tradução: João Ferreira de Almeida (almeida)
+Versículos recebidos: 1
 Nota: Public Domain
 ----------------------------------------------
 João 3:16
