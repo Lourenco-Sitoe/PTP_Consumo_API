@@ -6,17 +6,29 @@ namespace Consumo_API_CSharp;
 
 internal class Program
 {
-    private static readonly HttpClient HttpClient = new()
-    {
-        Timeout = TimeSpan.FromSeconds(20)
-    };
+    private static readonly HttpClient HttpClient = CriarHttpClient();
 
-    private const string ApiUrl = "https://dummyjson.com/quotes";
+    private const string ApiUrlPortugues =
+        "https://bible-api.com/john%203:16?translation=almeida";
+
+    private const string ApiUrlIngles =
+        "https://bible-api.com/john%203:16";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
     };
+
+    private static HttpClient CriarHttpClient()
+    {
+        HttpClient cliente = new()
+        {
+            Timeout = TimeSpan.FromSeconds(20)
+        };
+
+        cliente.DefaultRequestHeaders.UserAgent.ParseAdd("Consumo_API_CSharp/1.0");
+        return cliente;
+    }
 
     private static async Task Main(string[] args)
     {
@@ -26,7 +38,7 @@ internal class Program
         Console.WriteLine("==============================================");
         Console.WriteLine("       SISTEMA DE CONSUMO DE WEB API");
         Console.WriteLine("==============================================");
-        Console.WriteLine("API utilizada: DummyJSON - Quotes");
+        Console.WriteLine("API utilizada: Bible API");
         Console.WriteLine("Projeto: Consumo_API_CSharp");
         Console.WriteLine();
 
@@ -35,7 +47,8 @@ internal class Program
         while (continuar)
         {
             Console.WriteLine("MENU PRINCIPAL");
-            Console.WriteLine("1 - Consultar citações na API");
+            Console.WriteLine("1 - Consultar João 3:16 (Português - Almeida)");
+            Console.WriteLine("2 - Consultar John 3:16 (Inglês - World English Bible)");
             Console.WriteLine("0 - Sair");
             Console.Write("Escolha uma opção: ");
 
@@ -55,7 +68,11 @@ internal class Program
             switch (opcao)
             {
                 case "1":
-                    await ConsultarCitacoesAsync();
+                    await ConsultarPassagemAsync(ApiUrlPortugues);
+                    break;
+
+                case "2":
+                    await ConsultarPassagemAsync(ApiUrlIngles);
                     break;
 
                 case "0":
@@ -72,22 +89,22 @@ internal class Program
         }
     }
 
-    private static async Task ConsultarCitacoesAsync()
+    private static async Task ConsultarPassagemAsync(string url)
     {
         Console.WriteLine("A estabelecer ligação à API...");
-        Console.WriteLine($"Endpoint: {ApiUrl}");
+        Console.WriteLine($"Endpoint: {url}");
         Console.WriteLine();
 
         try
         {
             // 1. Envia uma requisição HTTP GET para a API.
             using HttpResponseMessage resposta =
-                await HttpClient.GetAsync(ApiUrl);
+                await HttpClient.GetAsync(url);
 
             // 2. Verifica se o servidor respondeu com sucesso.
             if (resposta.StatusCode == HttpStatusCode.NotFound)
             {
-                Console.WriteLine("Erro: o endereço da API não foi encontrado (404).");
+                Console.WriteLine("Erro: a passagem indicada não foi encontrada (404).");
                 return;
             }
 
@@ -97,27 +114,40 @@ internal class Program
             await using Stream fluxo = await resposta.Content.ReadAsStreamAsync();
 
             // 4. Converte (desserializa) o JSON para objetos C#.
-            QuotesResponse? dados =
-                await JsonSerializer.DeserializeAsync<QuotesResponse>(
+            BibleResponse? dados =
+                await JsonSerializer.DeserializeAsync<BibleResponse>(
                     fluxo, JsonOptions);
 
-            if (dados?.Quotes is null || dados.Quotes.Count == 0)
+            if (dados?.Verses is null || dados.Verses.Count == 0)
             {
-                Console.WriteLine("A API não devolveu citações.");
+                Console.WriteLine("A API não devolveu nenhum versículo.");
                 return;
             }
 
             // 5. Apresenta os dados ao utilizador.
             Console.WriteLine("CONSULTA REALIZADA COM SUCESSO!");
-            Console.WriteLine($"Total de citações informado pela API: {dados.Total}");
-            Console.WriteLine($"Citações recebidas nesta resposta: {dados.Quotes.Count}");
+            Console.WriteLine($"Referência: {dados.Reference}");
+            Console.WriteLine($"Tradução: {dados.TranslationName} ({dados.TranslationId})");
+
+            if (!string.IsNullOrWhiteSpace(dados.TranslationNote))
+            {
+                Console.WriteLine($"Nota: {dados.TranslationNote}");
+            }
+
             Console.WriteLine("----------------------------------------------");
 
-            foreach (Quote citacao in dados.Quotes)
+            foreach (Verse versiculo in dados.Verses)
             {
-                Console.WriteLine($"ID: {citacao.Id}");
-                Console.WriteLine($"Citação: {citacao.Text}");
-                Console.WriteLine($"Autor: {citacao.Author}");
+                Console.WriteLine(
+                    $"{versiculo.BookName} {versiculo.Chapter}:{versiculo.Number}");
+                Console.WriteLine(versiculo.Text.Trim());
+                Console.WriteLine("----------------------------------------------");
+            }
+
+            if (dados.Verses.Count > 1)
+            {
+                Console.WriteLine("TEXTO COMPLETO:");
+                Console.WriteLine(dados.Text.Trim());
                 Console.WriteLine("----------------------------------------------");
             }
         }
@@ -125,6 +155,13 @@ internal class Program
         {
             Console.WriteLine("ERRO DE COMUNICAÇÃO COM A API.");
             Console.WriteLine($"Detalhes: {ex.Message}");
+
+            if (ex.StatusCode is not null)
+            {
+                Console.WriteLine(
+                    $"Código HTTP: {(int)ex.StatusCode} ({ex.StatusCode})");
+            }
+
             Console.WriteLine("Verifique a ligação à Internet e tente novamente.");
         }
         catch (JsonException ex)
