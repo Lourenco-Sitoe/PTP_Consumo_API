@@ -49,7 +49,7 @@ internal class Program
             Console.WriteLine("MENU PRINCIPAL");
             Console.WriteLine("1 - Consultar João 3:16 (Português - Almeida)");
             Console.WriteLine("2 - Consultar John 3:16 (Inglês - World English Bible)");
-            Console.WriteLine("3 - Consultar outra passagem (Português - Almeida)");
+            Console.WriteLine("3 - Consultar outra passagem (Português ou Inglês)");
             Console.WriteLine("0 - Sair");
             Console.Write("Escolha uma opção: ");
 
@@ -96,8 +96,42 @@ internal class Program
 
     private static async Task ConsultarOutraPassagemAsync()
     {
+        Console.WriteLine("Escolha o idioma da passagem:");
+        Console.WriteLine("1 - Português (João Ferreira de Almeida)");
+        Console.WriteLine("2 - Inglês (World English Bible)");
+        Console.Write("Idioma: ");
+
+        string? idioma = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(idioma))
+        {
+            Console.WriteLine("Idioma inválido.");
+            return;
+        }
+
+        string sufixoUrl;
+        string exemplos;
+
+        switch (idioma.Trim())
+        {
+            case "1":
+                sufixoUrl = "?translation=almeida";
+                exemplos = "Gênesis 1 | Salmos 23 | Mateus 5:1-12 | João 3:16";
+                break;
+
+            case "2":
+                sufixoUrl = string.Empty;
+                exemplos = "Genesis 1 | Psalms 23 | Matthew 5:1-12 | John 3:16";
+                break;
+
+            default:
+                Console.WriteLine("Idioma inválido. Escolha 1 ou 2.");
+                return;
+        }
+
+        Console.WriteLine();
         Console.WriteLine("Introduza uma referência bíblica.");
-        Console.WriteLine("Exemplos: Gênesis 1 | Salmos 23 | Mateus 5:1-12 | João 3:16");
+        Console.WriteLine($"Exemplos: {exemplos}");
         Console.Write("Referência: ");
 
         string? referencia = Console.ReadLine();
@@ -111,7 +145,7 @@ internal class Program
         // Codifica espaços, acentos e outros caracteres para o URL.
         string referenciaCodificada = Uri.EscapeDataString(referencia.Trim());
         string url =
-            $"https://bible-api.com/{referenciaCodificada}?translation=almeida";
+            $"https://bible-api.com/{referenciaCodificada}{sufixoUrl}";
 
         await ConsultarPassagemAsync(url);
     }
