@@ -74,7 +74,7 @@ Exemplo simplificado da resposta:
 3. Aguarde a restauração dos componentes do projeto.
 4. Se necessário, selecione o projeto como projeto de arranque.
 5. Execute com `Ctrl + F5` ou clique em **Iniciar sem depurar**.
-6. No menu, escreva `1` ou `2` para as passagens de exemplo, ou `3` para introduzir outra referência e escolher o idioma (português ou inglês).
+6. No menu, escreva `1` ou `2` para as passagens de exemplo, ou `3` para introduzir outra referência e escolher a língua (português ou inglês).
 7. Para terminar, escreva `0`.
 
 É necessária uma ligação à Internet para consultar a API.
@@ -127,7 +127,7 @@ Consumo_API_CSharp/
 ## 9. Funcionamento do código
 
 1. `HttpClient` envia a requisição GET para o endpoint escolhido no menu.
-2. Na opção `3`, o utilizador escolhe primeiro o idioma e depois introduz a referência; `Uri.EscapeDataString()` codifica essa referência para que possa ser usada no URL.
+2. Na opção `3`, o utilizador escolhe primeiro a língua e depois introduz a referência; `Uri.EscapeDataString()` codifica essa referência para que possa ser usada no URL.
 3. A resposta 404 é tratada e `EnsureSuccessStatusCode()` verifica os restantes códigos HTTP.
 4. `ReadAsStreamAsync()` permite ler o conteúdo devolvido pelo servidor.
 5. `JsonSerializer.DeserializeAsync<BibleResponse>()` converte o JSON em objetos C#.

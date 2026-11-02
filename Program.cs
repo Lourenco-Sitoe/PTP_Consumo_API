@@ -96,23 +96,23 @@ internal class Program
 
     private static async Task ConsultarOutraPassagemAsync()
     {
-        Console.WriteLine("Escolha o idioma da passagem:");
+        Console.WriteLine("Escolha a língua da passagem:");
         Console.WriteLine("1 - Português (João Ferreira de Almeida)");
         Console.WriteLine("2 - Inglês (World English Bible)");
-        Console.Write("Idioma: ");
+        Console.Write("Língua: ");
 
-        string? idioma = Console.ReadLine();
+        string? lingua = Console.ReadLine();
 
-        if (string.IsNullOrWhiteSpace(idioma))
+        if (string.IsNullOrWhiteSpace(lingua))
         {
-            Console.WriteLine("Idioma inválido.");
+            Console.WriteLine("Língua inválida.");
             return;
         }
 
         string sufixoUrl;
         string exemplos;
 
-        switch (idioma.Trim())
+        switch (lingua.Trim())
         {
             case "1":
                 sufixoUrl = "?translation=almeida";
@@ -125,7 +125,7 @@ internal class Program
                 break;
 
             default:
-                Console.WriteLine("Idioma inválido. Escolha 1 ou 2.");
+                Console.WriteLine("Língua inválida. Escolha 1 ou 2.");
                 return;
         }
 
